@@ -18,10 +18,19 @@ class Socket(SocketAbstract):
 
 class ClientSocket(ClientSocketAbstract, Socket):
 
+    def __init__(self, ip):
+        super().__init__()
+        self.HOST = ip
+
     # start client socket
     def startSocket(self):
-        print("Connecting to server...")
-        self.s.connect((self.HOST, self.PORT))
+        try:
+            self.s.connect((self.HOST, self.PORT))
+        except ConnectionRefusedError:
+            self.started = False
+        else:
+            self.started = True
+        return self.started
 
     # Receive on server side
     def receiveData(self):
@@ -37,20 +46,17 @@ class ServerSocket(ServerSocketAbstract, Socket):
 
     # construct changes. We have conn, and addr here
     def __init__(self):
-        self.HOST = "127.0.1.1"
-        self.PORT = 9999
-        self.s = socket.socket()
+        super().__init__()
         self.conn = ""
         self.connAddr = ""
-        self.started = False
 
     # start server socket
     def startSocket(self):
         self.s.bind((self.HOST, self.PORT))
         self.s.listen(1)
-        print("Waiting to connect by someone...")
         self.conn, self.connAddr = self.s.accept()
         self.started = True
+        return self.started
 
     # Receive on client side
     def receiveData(self):

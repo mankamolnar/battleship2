@@ -7,7 +7,8 @@ from classes.SocketClass import Socket, ServerSocket, ClientSocket
 class HandleTurns:
 
     # !!! CONSTRUCT !!!
-    def __init__(self, player):
+    def __init__(self, player, gui, ip="127.0.1.1"):
+        self.gui = gui
         self.player = int(player)
         self.map = Map()
         self.myStage = "[placeShips]"
@@ -17,9 +18,9 @@ class HandleTurns:
         if self.player == 1:
             self.socket = ServerSocket()
         else:
-            self.socket = ClientSocket()
+            self.socket = ClientSocket(ip)
 
-        self.scrGetIP()
+        self.checkConnection(self.socket.startSocket())
 
     # defining who's turn is the first (player1 = first, player2 = second)
     def whosTheFirst(self, player):
@@ -27,6 +28,14 @@ class HandleTurns:
             return True
         elif player == 2:
             return False
+
+    # handle the successful or unsuccessful connection
+    def checkConnection(self, connected):
+        if self.player == 2:
+            if connected:
+                print("Connected")
+            else:
+                self.gui.client_on_error_widgets()
 
     # !!! SCREEN 1 - GET IP !!!
     def scrGetIP(self):
