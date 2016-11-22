@@ -24,14 +24,14 @@ class ClientSocket(ClientSocketAbstract, Socket):
 
     # start client socket
     def startSocket(self):
-        try:
-            print(self.HOST+"; "+str(self.PORT))
-            self.s.connect((self.HOST, self.PORT))
-        except ConnectionRefusedError:
+        #try:
+        print(self.HOST+"; "+str(self.PORT))
+        self.s.connect((self.HOST, self.PORT))
+        '''except ConnectionRefusedError:
             self.started = False
         else:
             self.started = True
-        return self.started
+        return self.started'''
 
     # Receive on server side
     def receiveData(self):
