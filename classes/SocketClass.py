@@ -6,7 +6,7 @@ class Socket(SocketAbstract):
 
     # defining that you are the host or the client
     def __init__(self):
-        self.HOST = "127.0.1.1"
+        self.HOST = "127.0.0.1"
         self.PORT = 9999
         self.s = socket.socket()
         self.started = False
@@ -24,14 +24,14 @@ class ClientSocket(ClientSocketAbstract, Socket):
 
     # start client socket
     def startSocket(self):
-        #try:
-        print(self.HOST+"; "+str(self.PORT))
-        self.s.connect((self.HOST, self.PORT))
-        '''except ConnectionRefusedError:
+        try:
+            print(self.HOST+"; "+str(self.PORT))
+            self.s.connect((self.HOST, self.PORT))
+        except ConnectionRefusedError:
             self.started = False
         else:
             self.started = True
-        return self.started'''
+        return self.started
 
     # Receive on server side
     def receiveData(self):
@@ -59,6 +59,7 @@ class ServerSocket(ServerSocketAbstract, Socket):
         self.s.listen(1)
         self.conn, self.connAddr = self.s.accept()
         self.started = True
+        print("itt")
         return self.started
 
     # Receive on client side

@@ -27,7 +27,8 @@ class Gui(tk.Frame):
         self.widget_logo()
         self.widget_host_button()
         self.widget_client_button()
-        self.widget_quit_button()
+        self.widget_new_window_button()
+        #self.widget_quit_button()
 
     # HOST MENU: main widgets
     def host_widgets(self):
@@ -111,6 +112,15 @@ class Gui(tk.Frame):
         self.widgets[len(self.widgets)-1]["command"] = self.start_turns_player_2
         self.widgets[len(self.widgets)-1].place(relx=0.5, y=156, x=-50)
 
+    # new window button
+    def widget_new_window_button(self):
+        self.widgets.append(tk.Button(self.root))
+        self.widgets[len(self.widgets)-1]["text"] = "New window"
+        self.widgets[len(self.widgets)-1]["width"] = 10
+        self.widgets[len(self.widgets)-1]["height"] = 3
+        self.widgets[len(self.widgets)-1]["command"] = self.new_window
+        self.widgets[len(self.widgets)-1].place(relx=0.5, y=415, x=-50)
+
     # set window size and place bg image
     def configure_window(self):
         self.root.minsize(width=800, height=600)
@@ -143,3 +153,7 @@ class Gui(tk.Frame):
 
     def getAbsPath(self):
         return os.path.dirname(os.path.abspath(__file__))+"/"
+
+    def new_window(self):
+        #self.newWindow = tk.Toplevel(self.root)
+        self.app = Gui(tk.Tk())

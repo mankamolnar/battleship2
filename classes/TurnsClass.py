@@ -7,7 +7,7 @@ from classes.SocketClass import Socket, ServerSocket, ClientSocket
 class HandleTurns:
 
     # !!! CONSTRUCT !!!
-    def __init__(self, player, gui, ip="127.0.1.1"):
+    def __init__(self, player, gui, ip="127.0.0.1"):
         self.gui = gui
         self.player = int(player)
         self.map = Map()
