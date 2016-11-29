@@ -10,6 +10,7 @@ class Gui(tk.Frame):
     bg = ""
     widgets = []
     turns = ""
+    horizontal_or_vertical = "H"
 
     def __init__(self, master=None):
         super().__init__(master)
@@ -27,8 +28,7 @@ class Gui(tk.Frame):
         self.widget_logo()
         self.widget_host_button()
         self.widget_client_button()
-        self.widget_new_window_button()
-        #self.widget_quit_button()
+        self.widget_quit_button()
 
     # HOST MENU: main widgets
     def host_widgets(self):
@@ -55,6 +55,39 @@ class Gui(tk.Frame):
         self.widget_connect_button()
         self.widget_quit_button()
 
+    # PLACE SHIPS
+    def place_ships_widgets(self, map=""):
+        self.clear_widgets()
+        self.widget_logo()
+        self.widget_label_sublogo("Where would you like to place your "+str(self.turns.all_ships[self.turns.current_ship])+" long ship!")
+        self.widget_coo_input()
+        self.widget_horizontal_or_vertical_radio()
+        self.widget_place_ship_button()
+        self.widget_print_map(map)
+
+    def error_on_place_ships_widgets(self, map=""):
+        self.clear_widgets()
+        self.widget_logo()
+        self.widget_label_sublogo("You cannot place your "+str(self.turns.all_ships[self.turns.current_ship])+" long ship there! Try again!")
+        self.widget_coo_input()
+        self.widget_horizontal_or_vertical_radio()
+        self.widget_place_ship_button()
+        self.widget_print_map(map)
+
+    def waiting_for_enemy_to_place_ships_with_map(self, map=""):
+        self.clear_widgets()
+        self.widget_logo()
+        self.widget_label_sublogo("Waiting for your enemy to place his ships!")
+        self.widget_print_map(map)
+
+    def waiting_for_enemy_to_place_ships(self):
+        self.clear_widgets()
+        self.widget_logo()
+        self.widget_label_sublogo("Waiting for enemy to place his ships!")
+        self.widget_quit_button()
+
+    def shoot_widgets(self):
+        pass
 
     # !!! WIDGETS !!!
     # place logo
@@ -93,6 +126,15 @@ class Gui(tk.Frame):
         self.widgets[len(self.widgets)-1]["command"] = self.root.destroy
         self.widgets[len(self.widgets)-1].place(relx=0.5, y=415, x=-50)
 
+    # Place Ship button
+    def widget_place_ship_button(self):
+        self.widgets.append(tk.Button(self.root))
+        self.widgets[len(self.widgets)-1]["text"] = "Place ship!"
+        self.widgets[len(self.widgets)-1]["width"] = 10
+        self.widgets[len(self.widgets)-1]["height"] = 3
+        self.widgets[len(self.widgets)-1]["command"] = self.handle_placeship
+        self.widgets[len(self.widgets)-1].place(relx=0.5, y=485, x=-50)
+
     # waiting for connection
     def widget_label_sublogo(self, ptext):
         self.widgets.append(tk.Label(self.root, text=ptext, width=40, fg="Red"))
@@ -101,6 +143,7 @@ class Gui(tk.Frame):
     # ip entry
     def widget_ip_input(self):
         self.widgets.append(tk.Entry(self.root, width=20))
+        self.widgets[len(self.widgets)-1].insert(0, "127.0.0.1")
         self.widgets[len(self.widgets)-1].place(relx=0.5, x=-80, y=133)
 
     # connect to host button
@@ -112,14 +155,48 @@ class Gui(tk.Frame):
         self.widgets[len(self.widgets)-1]["command"] = self.start_turns_player_2
         self.widgets[len(self.widgets)-1].place(relx=0.5, y=156, x=-50)
 
-    # new window button
-    def widget_new_window_button(self):
-        self.widgets.append(tk.Button(self.root))
-        self.widgets[len(self.widgets)-1]["text"] = "New window"
-        self.widgets[len(self.widgets)-1]["width"] = 10
-        self.widgets[len(self.widgets)-1]["height"] = 3
-        self.widgets[len(self.widgets)-1]["command"] = self.new_window
-        self.widgets[len(self.widgets)-1].place(relx=0.5, y=415, x=-50)
+    # build up a map from buttons. we can give them action and a map work from
+    def widget_print_map(self, map="", action=""):
+        currenty = 0
+        currentx = 0
+
+        for j in range(0, 10):
+            currenty = 185 + (j*30)
+            for i in range(0, 10):
+                currentx = 238 + (i*30)
+                if map.myMap[j][i] == 0:
+                    self.place_map_label("Blue", j, i, currentx, currenty)
+                elif map.myMap[j][i] > 0:
+                    self.place_map_label("Green", j, i, currentx, currenty)
+
+    def place_map_label(self, color, j, i, currentx, currenty):
+        self.widgets.append(tk.Label(self.root))
+        self.widgets[len(self.widgets)-1]["text"] = str(j)+""+str(i)
+        self.widgets[len(self.widgets)-1]["width"] = 2
+        self.widgets[len(self.widgets)-1]["height"] = 1
+        self.widgets[len(self.widgets)-1]["bg"] = color
+        self.widgets[len(self.widgets)-1].place(y=currenty, x=currentx)
+
+    def widget_horizontal_or_vertical_radio(self):
+        self.widgets.append(tk.Radiobutton(self.root, variable=self.horizontal_or_vertical, value=0, command=self.set_orientation_horizontal))
+        self.widgets[len(self.widgets)-1]["text"] = "Horizontal"
+        self.widgets[len(self.widgets)-1].place(y=155, x=240)
+
+        self.widgets.append(tk.Radiobutton(self.root, variable=self.horizontal_or_vertical, value=1, command=self.set_orientation_vertical))
+        self.widgets[len(self.widgets)-1]["text"] = "Vertical"
+        self.widgets[len(self.widgets)-1].deselect()
+        self.widgets[len(self.widgets)-1].place(y=155, x=460)
+
+    def set_orientation_horizontal(self):
+        self.horizontal_or_vertical = "H"
+
+    def set_orientation_vertical(self):
+        self.horizontal_or_vertical = "V"
+
+    # Coordinate input
+    def widget_coo_input(self):
+        self.widgets.append(tk.Entry(self.root, width=20))
+        self.widgets[len(self.widgets)-1].place(relx=0.5, x=-80, y=133)
 
     # set window size and place bg image
     def configure_window(self):
@@ -133,27 +210,48 @@ class Gui(tk.Frame):
     def clear_widgets(self):
         for widget in self.widgets:
             widget.place_forget()
+        self.widgets = []
 
     # !!! SYSTEM FUNCTIONS !!!
     # create turns class for player 1
     def start_turns_player_1(self):
         self.host_widgets()
-        _thread.start_new_thread(HandleTurns, (1, self, ))
+        self.turns = HandleTurns(1, self)
 
     # create turns class for player 2
     def start_turns_player_2(self):
-        ip = ""
+        ip = self.get_textarea_value()
+        self.turns = HandleTurns(2, self, ip)
+
+    # return string
+    def get_textarea_value(self):
         for widget in self.widgets:
             if type(widget) == tk.Entry:
-                ip = widget.get()
-        _thread.start_new_thread(HandleTurns, (2, self, ip, ))
+                return widget.get()
+        return False
 
-    def say_hi(self):
-        print("hi there, everyone!")
+    def handle_placeship(self):
+        coo = self.get_textarea_value()
+        coo = self.horizontal_or_vertical+" "+str(int(coo[0])+1)+" "+str(int(coo[1])+1)
+        no_errors = self.turns.map.placeShip(coo, self.turns.all_ships[self.turns.current_ship])
+        has_next_ship = self.turns.nextShip()
+
+        if not has_next_ship:
+            self.turns.socket.sendData(self.turns.map.serialize(self.turns.map.myMap))
+
+            if self.turns.player == 1:
+                self.waiting_for_enemy_to_place_ships_with_map(self.turns.map)
+                self.turns.start_get_map_thread()
+
+            else:
+                self.shoot_widgets()
+
+        if no_errors and has_next_ship:
+            self.place_ships_widgets(self.turns.map)
+
+        elif not no_errors:
+            self.error_on_place_ships_widgets(self.turns.map)
+            self.turns.preShip()
 
     def getAbsPath(self):
         return os.path.dirname(os.path.abspath(__file__))+"/"
-
-    def new_window(self):
-        #self.newWindow = tk.Toplevel(self.root)
-        self.app = Gui(tk.Tk())

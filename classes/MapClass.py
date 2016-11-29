@@ -21,11 +21,11 @@ class Map(MapAbstract):
     def placeShip(self, coordinate, length):
         if self.testCoordinate(coordinate) and self.testLength(length) and self.shipInRange(coordinate, length) and self.noShipCollide(coordinate, length):
             coordinate = self.cooToList(coordinate)
-            if coordinate[0] == "H":
-                for i in range(0,length):
+            if coordinate[0].upper() == "H":
+                for i in range(0, length):
                     self.myMap[coordinate[1]][coordinate[2]+i] = length
-            if coordinate[0] == "V":
-                for i in range(0,length):
+            if coordinate[0].upper() == "V":
+                for i in range(0, length):
                     self.myMap[coordinate[1]+i][coordinate[2]] = length
             return True
         else:
@@ -42,7 +42,7 @@ class Map(MapAbstract):
         if str(length).strip() != "" and isinstance(length, int):
             return True
         return False
-    
+
     # converting and casting coordinates to list
     def cooToList(self, coordinate):
         coordinate = str(coordinate).strip().split(" ")
@@ -61,7 +61,7 @@ class Map(MapAbstract):
             if coordinate[1] >= 0 and coordinate[1] < 10 and coordinate[2] >= 0 and coordinate[2] < 10 and coordinate[1] + length >= 0 and coordinate[1] + length < 10:
                 return True
         return False
-    
+
     #Testing for ship collide
     def noShipCollide(self, coordinate, length):
         coordinate = self.cooToList(coordinate)
@@ -75,7 +75,7 @@ class Map(MapAbstract):
                 if self.myMap[coordinate[1]+i][coordinate[2]] > 0:
                     return False
         return True
-    
+
     #!!! SHOT !!!
     #shooting to someone
     def shot(self, coordinate):
@@ -90,7 +90,7 @@ class Map(MapAbstract):
                 return "[shotHere]"
         else:
             return False
-    
+
     #testing down the coordinates format
     def testShotCoordinate(self, coordinate):
         if isinstance(coordinate, str) and len(coordinate.strip().split(" ")) == 2 and coordinate.strip().split(" ")[0].isdigit() and coordinate.strip().split(" ")[1].isdigit():
@@ -111,7 +111,7 @@ class Map(MapAbstract):
             return True
         else:
             return False
-    
+
     #shot coordinate to list
     def shotCooToList(self, coordinate):
         coordinate = coordinate.strip().split(" ")
@@ -128,14 +128,14 @@ class Map(MapAbstract):
             for j in range(0, len(map[i])):
                 linestr += str(map[i][j])+" "
             print(linestr)
-    
-    #define how many spaces do you need for the draw line
+
+    # define how many spaces do you need for the draw line
     def defineSpaces(self, i):
         if len(str(i+1)) == 1:
             return "  "
         else:
             return " "
-    
+
     #serialize map
     def serialize(self, map):
         string = ""
