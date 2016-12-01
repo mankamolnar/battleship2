@@ -63,7 +63,7 @@ class Gui(tk.Frame):
         self.widget_coo_input()
         self.widget_horizontal_or_vertical_radio()
         self.widget_place_ship_button()
-        self.widget_print_map(map)
+        self.widget_print_map(self.turns.map.myMap)
 
     def error_on_place_ships_widgets(self, map=""):
         self.clear_widgets()
@@ -72,13 +72,13 @@ class Gui(tk.Frame):
         self.widget_coo_input()
         self.widget_horizontal_or_vertical_radio()
         self.widget_place_ship_button()
-        self.widget_print_map(map)
+        self.widget_print_map(self.turns.map.myMap)
 
     def waiting_for_enemy_to_place_ships_with_map(self, map=""):
         self.clear_widgets()
         self.widget_logo()
         self.widget_label_sublogo("Waiting for your enemy to place his ships!")
-        self.widget_print_map(map)
+        self.widget_print_map(self.turns.map.myMap)
 
     def waiting_for_enemy_to_place_ships(self):
         self.clear_widgets()
@@ -87,7 +87,13 @@ class Gui(tk.Frame):
         self.widget_quit_button()
 
     def shoot_widgets(self):
-        pass
+        self.clear_widgets()
+        self.widget_logo()
+        self.widget_label_sublogo("Write in where would you like to shoot!")
+        self.widget_coo_input()
+        self.widget_print_map(self.turns.map.shotMap)
+        self.widget_shoot_button()
+        self.widget_show_life()
 
     # !!! WIDGETS !!!
     # place logo
@@ -135,10 +141,23 @@ class Gui(tk.Frame):
         self.widgets[len(self.widgets)-1]["command"] = self.handle_placeship
         self.widgets[len(self.widgets)-1].place(relx=0.5, y=485, x=-50)
 
+    def widget_shoot_button(self):
+        self.widgets.append(tk.Button(self.root))
+        self.widgets[len(self.widgets)-1]["text"] = "Shoot!"
+        self.widgets[len(self.widgets)-1]["width"] = 10
+        self.widgets[len(self.widgets)-1]["height"] = 3
+        self.widgets[len(self.widgets)-1]["command"] = self.handle_shoot
+        self.widgets[len(self.widgets)-1].place(relx=0.5, y=485, x=-50)
+
     # waiting for connection
     def widget_label_sublogo(self, ptext):
         self.widgets.append(tk.Label(self.root, text=ptext, width=40, fg="Red"))
         self.widgets[len(self.widgets)-1].place(relx=0.5, x=-160, y=110)
+
+    # waiting for connection
+    def widget_show_life(self):
+        self.widgets.append(tk.Label(self.root, text="Life: "+str(self.turns.life), width=20, fg="Red"))
+        self.widgets[len(self.widgets)-1].place(x=5, y=5)
 
     # ip entry
     def widget_ip_input(self):
@@ -164,10 +183,16 @@ class Gui(tk.Frame):
             currenty = 185 + (j*30)
             for i in range(0, 10):
                 currentx = 238 + (i*30)
-                if map.myMap[j][i] == 0:
-                    self.place_map_label("Blue", j, i, currentx, currenty)
-                elif map.myMap[j][i] > 0:
-                    self.place_map_label("Green", j, i, currentx, currenty)
+                if str(map[j][i]).isdigit():
+                    if map[j][i] == 0:
+                        self.place_map_label("Blue", j, i, currentx, currenty)
+                    elif map[j][i] > 0:
+                        self.place_map_label("Green", j, i, currentx, currenty)
+                else:
+                    if map[j][i] == "x":
+                        self.place_map_label("Yellow", j, i, currentx, currenty)
+                    elif map[j][i] == "h":
+                        self.place_map_label("Red", j, i, currentx, currenty)
 
     def place_map_label(self, color, j, i, currentx, currenty):
         self.widgets.append(tk.Label(self.root))
@@ -201,6 +226,7 @@ class Gui(tk.Frame):
     # set window size and place bg image
     def configure_window(self):
         self.root.minsize(width=800, height=600)
+        self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
         self.bgimg = tk.PhotoImage(file=self.getAbsPath()+"../bg.gif")
         self.bg = tk.Label(self.root, image=self.bgimg)
         self.bg.img = self.bgimg
@@ -243,10 +269,10 @@ class Gui(tk.Frame):
 
             if self.turns.player == 1:
                 self.waiting_for_enemy_to_place_ships_with_map(self.turns.map)
-                self.turns.start_get_map_thread()
+                _thread.start_new_thread(self.turns.get_enemy_map, ())
 
             else:
-                self.shoot_widgets()
+                self.start_shooting()
 
         if no_errors and has_next_ship:
             self.place_ships_widgets(self.turns.map)
@@ -254,6 +280,27 @@ class Gui(tk.Frame):
         elif not no_errors:
             self.error_on_place_ships_widgets(self.turns.map)
             self.turns.preShip()
+
+    def handle_shoot(self):
+        coo = self.get_textarea_value()
+        tmpj = int(coo[0])
+        tmpi = int(coo[1])
+
+        if type(self.turns.map.enemyMap[tmpj][tmpi]) == str and self.turns.map.enemyMap[tmpj][tmpi] != "0":
+            self.turns.map.shotMap[tmpj][tmpi] = "h"
+            self.turns.socket.sendData("hit")
+
+        elif type(self.turns.map.enemyMap[tmpj][tmpi]) == str and self.turns.map.enemyMap[tmpj][tmpi] == "0":
+            self.turns.map.shotMap[tmpj][tmpi] = "x"
+        self.shoot_widgets()
+
+    def start_shooting(self):
+        _thread.start_new_thread(self.turns.get_endless_socket, ())
+        self.shoot_widgets()
+
+    def on_closing(self):
+        self.turns.socket.closeSocket()
+        self.root.destroy()
 
     def getAbsPath(self):
         return os.path.dirname(os.path.abspath(__file__))+"/"

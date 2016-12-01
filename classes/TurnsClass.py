@@ -7,17 +7,17 @@ import _thread
 class HandleTurns:
     all_ships = [2, 3, 3, 4, 5]
     current_ship = 0
+
     def __init__(self, player, gui, ip="127.0.0.1"):
         self.gui = gui
         self.player = int(player)
         self.map = Map()
+        self.life = 17
 
         if self.player == 1:
             self.socket = ServerSocket()
         else:
             self.socket = ClientSocket(ip)
-        #self.socket.startSocket()
-        # self.start_game(self.socket.startSocket())
 
     # defining who's turn is the first (player1 = first, player2 = second)
     def whosTheFirst(self, player):
@@ -42,9 +42,14 @@ class HandleTurns:
             else:
                 self.gui.client_on_error_widgets()
 
+    # get enemy's map through socket
     def get_enemy_map(self):
         serializedMap = self.socket.receiveData()
         self.map.enemyMap = self.map.serToMap(serializedMap)
+
+        if self.player == 1:
+            self.gui.start_shooting()
+
         return True
 
     # if the response is [readyToPlay] returns True otherwise False
@@ -83,3 +88,18 @@ class HandleTurns:
         os.system('cls' if os.name == 'nt' else 'clear')
         print("Player "+str(self.player)+"\n")
         self.map.draw(self.map.myMap)
+
+    # endless socket from shoot part
+    def get_endless_socket(self):
+        while True:
+            answer = self.socket.receiveData()
+            if answer == "hit":
+                self.life -= 1
+
+                if self.life == 0:
+                    #self.
+                    pass
+                else:
+                    self.gui.widgets[len(self.gui.widgets)-1].place_forget()
+                    del self.gui.widgets[len(self.gui.widgets)-1]
+                    self.gui.widget_show_life()

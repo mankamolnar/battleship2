@@ -62,22 +62,22 @@ class Map(MapAbstract):
                 return True
         return False
 
-    #Testing for ship collide
+    # Testing for ship collide
     def noShipCollide(self, coordinate, length):
         coordinate = self.cooToList(coordinate)
         length -= 1
         if coordinate[0] == "H":
-            for i in range(0,length):
+            for i in range(0, length):
                 if self.myMap[coordinate[1]][coordinate[2]+i] > 0:
                     return False
         if coordinate[1] == "V":
-            for i in range(0,length):
+            for i in range(0, length):
                 if self.myMap[coordinate[1]+i][coordinate[2]] > 0:
                     return False
         return True
 
-    #!!! SHOT !!!
-    #shooting to someone
+    # !!! SHOT !!!
+    # shooting to someone
     def shot(self, coordinate):
         if self.testShotCoordinate(coordinate) and self.testShotCooInRange(coordinate):
             if self.haventShotHere(coordinate):
