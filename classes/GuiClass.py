@@ -95,6 +95,18 @@ class Gui(tk.Frame):
         self.widget_shoot_button()
         self.widget_show_life()
 
+    def victory_widgets(self):
+        self.clear_widgets()
+        self.widget_logo()
+        self.widget_label_sublogo("You won!")
+        self.widget_quit_button()
+
+    def loose_widgets(self):
+        self.clear_widgets()
+        self.widget_logo()
+        self.widget_label_sublogo("You lost!")
+        self.widget_quit_button()
+
     # !!! WIDGETS !!!
     # place logo
     def widget_logo(self):
@@ -212,12 +224,6 @@ class Gui(tk.Frame):
         self.widgets[len(self.widgets)-1].deselect()
         self.widgets[len(self.widgets)-1].place(y=155, x=460)
 
-    def set_orientation_horizontal(self):
-        self.horizontal_or_vertical = "H"
-
-    def set_orientation_vertical(self):
-        self.horizontal_or_vertical = "V"
-
     # Coordinate input
     def widget_coo_input(self):
         self.widgets.append(tk.Entry(self.root, width=20))
@@ -281,8 +287,21 @@ class Gui(tk.Frame):
             self.error_on_place_ships_widgets(self.turns.map)
             self.turns.preShip()
 
+    def set_orientation_horizontal(self):
+        self.horizontal_or_vertical = "H"
+
+    def set_orientation_vertical(self):
+        self.horizontal_or_vertical = "V"
+
     def handle_shoot(self):
         coo = self.get_textarea_value()
+
+        if coo == "dead":
+            self.turns.socket.sendData("dead")
+            self.loose_widgets()
+            self.turns.socket.closeSocket()
+            return
+
         tmpj = int(coo[0])
         tmpi = int(coo[1])
 

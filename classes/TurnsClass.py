@@ -75,20 +75,6 @@ class HandleTurns:
         else:
             return False
 
-    # !!! SCREEN 3 - shooting part
-    def scrShootShip(self):
-        if self.myTurn:
-            print("Herecomestheshootpart")
-        else:
-            print("Waiting for the other player to place his ships...")
-            response = self.socket.receiveData()
-
-    # drawing for placeships
-    def drawPlaceShip(self):
-        os.system('cls' if os.name == 'nt' else 'clear')
-        print("Player "+str(self.player)+"\n")
-        self.map.draw(self.map.myMap)
-
     # endless socket from shoot part
     def get_endless_socket(self):
         while True:
@@ -97,9 +83,14 @@ class HandleTurns:
                 self.life -= 1
 
                 if self.life == 0:
-                    #self.
-                    pass
+                    self.gui.loose_widgets()
+                    self.socket.sendData("dead")
+                    self.socket.closeSocket()
+
                 else:
                     self.gui.widgets[len(self.gui.widgets)-1].place_forget()
                     del self.gui.widgets[len(self.gui.widgets)-1]
                     self.gui.widget_show_life()
+            elif answer == "dead":
+                self.gui.victory_widgets()
+                self.socket.closeSocket()
