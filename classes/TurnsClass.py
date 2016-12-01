@@ -5,20 +5,19 @@ import _thread
 
 
 class HandleTurns:
-
+    all_ships = [2, 3, 3, 4, 5]
+    current_ship = 0
     def __init__(self, player, gui, ip="127.0.0.1"):
         self.gui = gui
         self.player = int(player)
         self.map = Map()
-        self.current_ship = 0
-        self.all_ships = [2, 3, 3, 4, 5]
 
         if self.player == 1:
             self.socket = ServerSocket()
         else:
             self.socket = ClientSocket(ip)
-        
-        self.checkConnection(self.socket.startSocket())
+        #self.socket.startSocket()
+        # self.start_game(self.socket.startSocket())
 
     # defining who's turn is the first (player1 = first, player2 = second)
     def whosTheFirst(self, player):
@@ -28,25 +27,25 @@ class HandleTurns:
             return False
 
     # handle the successful or unsuccessful connection
-    def checkConnection(self, connected):
+    def start_game(self):
+        self.socket.startSocket()
         if self.player == 1:
-            if connected:
+            if self.socket.started:
                 self.gui.place_ships_widgets(self.map)
 
         elif self.player == 2:
-            if connected:
+            if self.socket.started:
                 self.gui.waiting_for_enemy_to_place_ships()
-                self.start_get_map_thread()
+                self.get_enemy_map()
+                self.gui.place_ships_widgets(self.map)
+
             else:
                 self.gui.client_on_error_widgets()
-
-    def start_get_map_thread(self):
-        _thread.start_new_thread(self.get_enemy_map, ())
 
     def get_enemy_map(self):
         serializedMap = self.socket.receiveData()
         self.map.enemyMap = self.map.serToMap(serializedMap)
-        print(self.map.enemyMap)
+        return True
 
     # if the response is [readyToPlay] returns True otherwise False
     def handlePlaceShipResponse(self, response):

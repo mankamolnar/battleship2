@@ -217,11 +217,13 @@ class Gui(tk.Frame):
     def start_turns_player_1(self):
         self.host_widgets()
         self.turns = HandleTurns(1, self)
+        _thread.start_new_thread(self.turns.start_game, ())
 
     # create turns class for player 2
     def start_turns_player_2(self):
         ip = self.get_textarea_value()
         self.turns = HandleTurns(2, self, ip)
+        _thread.start_new_thread(self.turns.start_game, ())
 
     # return string
     def get_textarea_value(self):
