@@ -52,7 +52,7 @@ class ServerSocket(ServerSocketAbstract, Socket):
 
     # start server socket
     def startSocket(self):
-        self.s.bind((self.HOST, self.PORT))
+        self.s.bind(('', self.PORT))
         self.s.listen(1)
         self.conn, self.connAddr = self.s.accept()
         self.started = True
